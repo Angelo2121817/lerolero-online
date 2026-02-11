@@ -5,7 +5,7 @@ import re # <-- Nova Importação para Regex
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError # <-- Nova Importação para Erros Específicos
 from langchain_community.vectorstores import Chroma
-from langchain_ollama import OllamaEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from fpdf import FPDF
@@ -369,7 +369,7 @@ if "dados_auto" not in st.session_state: st.session_state.dados_auto = {"empresa
 def carregar_cerebro():
     try:
         # O Chroma precisa da função de embedding para ser carregado
-        embeddings = OllamaEmbeddings(model="llama3")
+        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         # O Chroma usa um diretório para persistência
         persist_directory = "banco_chroma"
 
