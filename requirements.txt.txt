@@ -1,6 +1,6 @@
- streamlit
-    pypdf
-    langchain-community
-    langchain-core
-    fpdf
-    langchain-groq
+streamlit
+groq
+langchain
+faiss-cpu
+langchain_groq
+pypdf
