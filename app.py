@@ -311,7 +311,7 @@ def consultar_ia(exigencia, vectorstore, temperatura=0.0, modo="media"):
     docs = vectorstore.similarity_search(exigencia, k=3)
     contexto = "\n".join([d.page_content for d in docs])
     
-                llm = ChatGroq(
+    llm = ChatGroq(
                 model_name="llama3-70b-8192", 
                 groq_api_key=st.secrets["GROQ_API_KEY"],
                 temperature=temperatura
