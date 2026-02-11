@@ -3,4 +3,4 @@ groq
 langchain
 faiss-cpu
 langchain_groq
-pypdf
+PyPDF2
