@@ -4,7 +4,7 @@ import datetime
 import re # <-- Nova Importação para Regex
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError # <-- Nova Importação para Erros Específicos
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import Chroma
 from langchain_ollama import OllamaEmbeddings
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
@@ -364,14 +364,26 @@ if "fila_exigencias" not in st.session_state: st.session_state.fila_exigencias =
 if "dados_auto" not in st.session_state: st.session_state.dados_auto = {"empresa": "", "cnpj": "", "end": "", "cid": ""}
 
 # --- CARREGAR CÉREBRO ---
+# --- CARREGAR CÉREBRO (VERSÃO CORRIGIDA COM CHROMA) ---
 @st.cache_resource
 def carregar_cerebro():
-    #embeddings = OllamaEmbeddings(model="llama3")
-    #try:
-        #if os.path.exists("banco_faiss"):
-        #    return FAISS.load_local("banco_faiss", embeddings, allow_dangerous_deserialization=True)
-       # return None
-   # except:
+    try:
+        # O Chroma precisa da função de embedding para ser carregado
+        embeddings = OllamaEmbeddings(model="llama3")
+        # O Chroma usa um diretório para persistência
+        persist_directory = "banco_chroma"
+
+        # Verifica se o banco de dados já foi treinado e existe
+        if os.path.exists(persist_directory):
+            # Carrega o banco de dados local
+            st.info("Carregando cérebro...")
+            return Chroma(persist_directory=persist_directory, embedding_function=embeddings)
+        else:
+            # Se não houver banco treinado, informa o usuário.
+            st.warning("Cérebro não encontrado. Rode 'treinar.py' para criar o banco de dados vetorial.")
+            return None
+    except Exception as e:
+        st.error(f"Ocorreu um erro ao carregar o cérebro: {e}")
         return None
 
 vectorstore = carregar_cerebro()

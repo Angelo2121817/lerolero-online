@@ -1,6 +1,6 @@
 streamlit
 groq
 langchain
-#faiss-cpu
+chromadb
 langchain_groq
 pypdf
