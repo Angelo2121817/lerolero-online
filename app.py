@@ -110,7 +110,11 @@ def processar_pdf_completo(arquivo_pdf):
 
         # --- ETAPA 2: Configuração e Uso do LLM ---
         try:
-            llm = ChatOllama(model="llama3", temperature=0.0)
+         llm = ChatGroq(
+        model_name="llama3-70b-8192", 
+        groq_api_key=st.secrets["GROQ_API_KEY"],
+        temperature=0.0
+    )
         except Exception as e:
             error_msg = f"ERRO: Falha ao inicializar o modelo LLM 'llama3'. Verifique se o Ollama está rodando e o modelo está instalado."
             return (error_msg, error_msg)
@@ -200,7 +204,11 @@ def processar_apenas_cadastro(arquivo_pdf):
             return "ERRO: Não foi possível extrair texto das primeiras páginas do PDF."
 
         try:
-            llm = ChatOllama(model="llama3", temperature=0.0)
+              llm = ChatGroq(
+        model_name="llama3-70b-8192", 
+        groq_api_key=st.secrets["GROQ_API_KEY"],
+        temperature=0.0
+    )
         except Exception as e:
             return "ERRO: Falha ao inicializar o modelo LLM 'llama3'."
 
