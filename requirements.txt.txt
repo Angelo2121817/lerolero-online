@@ -1,6 +1,7 @@
-    streamlit
-    groq
-    langchain
-    faiss-cpu
-    langchain_groq
-    pypdf
+streamlit
+groq
+langchain
+faiss-cpu
+langchain_groq
+pypdf
+
