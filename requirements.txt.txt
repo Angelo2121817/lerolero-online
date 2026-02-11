@@ -1,0 +1,6 @@
+ streamlit
+    pypdf
+    langchain-community
+    langchain-core
+    fpdf
+    langchain-groq
