@@ -1,6 +1,6 @@
 streamlit
 groq
 langchain
-faiss-cpu
+#faiss-cpu
 langchain_groq
 pypdf
