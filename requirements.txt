@@ -4,4 +4,3 @@ langchain
 faiss-cpu
 langchain_groq
 pypdf
-
