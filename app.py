@@ -314,7 +314,7 @@ with st.sidebar:
     INPUT_CIDADE = st.text_input("Cidade", st.session_state.dados_auto["cidade"])
     
     st.markdown("---")
-    INPUT_NOME = st.text_input("Assinatura (Nome)", "Engenheiro Responsável")
+    INPUT_NOME = st.text_input("Assinatura (Nome)", "Ângelo Aparecido Amadeu Júnior")
     INPUT_CARGO = st.text_input("Cargo", "Diretor Técnico")
 
 ### FIM DO NOVO CÓDIGO ###
@@ -423,6 +423,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
