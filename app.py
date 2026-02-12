@@ -198,13 +198,15 @@ def carregar_ou_construir_cerebro():
 # --- FUNÇÃO DE GERAR PDF FINAL ---
 ### INÍCIO DO NOVO CÓDIGO ###
 
+### INÍCIO DO NOVO CÓDIGO ###
+
 # --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     
-    # <<< CIRURGIA FINAL E DEFINITIVA: Limpeza de ASTERISCOS e todos os tipos de aspas >>>
+    # Limpeza robusta de TODOS os caracteres indesejados
     empresa_limpa = str(empresa).strip().strip("'\"“”*")
     cidade_limpa = str(cidade).strip().strip("'\"“”*")
     nome_limpo = str(nome).strip().strip("'\"“”*")
@@ -238,7 +240,9 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     # Assinatura
     if pdf.get_y() > 240: pdf.add_page()
     pdf.ln(10)
-    pdf.set_font("Arial", "", 11)
+    
+    # --- CIRURGIA FINAL E DEFINITIVA PARA A LINHA DA DATA ---
+    # 1. Prepara a data formatada
     hoje = datetime.date.today()
     meses = {
         "01": "janeiro", "02": "fevereiro", "03": "março", "04": "abril", 
@@ -246,7 +250,18 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
         "09": "setembro", "10": "outubro", "11": "novembro", "12": "dezembro"
     }
     data_formatada = f"{hoje.day} de {meses[hoje.strftime('%m')]} de {hoje.year}"
-    pdf.cell(0, 10, f"{cidade_limpa.encode('latin-1', 'replace').decode('latin-1')}, {data_formatada}", ln=True, align="C")
+    
+    # 2. Cria a string completa da linha
+    linha_cidade_data = f"{cidade_limpa}, {data_formatada}"
+    
+    # 3. Define a fonte EXATAMENTE antes de escrever
+    pdf.set_font("Arial", "", 11)
+    
+    # 4. Escreve a linha completa de uma só vez
+    pdf.cell(0, 10, linha_cidade_data.encode('latin-1', 'replace').decode('latin-1'), ln=True, align="C")
+    
+    # --- FIM DA CIRURGIA ---
+    
     pdf.ln(15)
     pdf.line(60, pdf.get_y(), 150, pdf.get_y())
     pdf.set_font("Arial", "B", 11)
@@ -256,7 +271,6 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     
     return pdf.output(dest="S").encode("latin-1", "replace")
 
-### FIM DO NOVO CÓDIGO ###
 ### FIM DO NOVO CÓDIGO ###
 ### FIM DO NOVO CÓDIGO ###
 # --- INTERFACE PRINCIPAL ---
@@ -437,6 +451,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
