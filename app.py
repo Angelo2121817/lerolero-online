@@ -57,16 +57,25 @@ st.markdown(f"""
 
 # --- FUNÇÕES DE EXTRAÇÃO E PROCESSAMENTO ---
 
+### INÍCIO DO NOVO CÓDIGO ###
+
 def extrair_dados_cadastrais_do_texto(texto_llm):
+    """Converte o texto bruto da IA em um dicionário de dados, limpando aspas."""
     dados = {"empresa": "", "cnpj": "", "endereco": "", "cidade": ""}
     padroes = {
-        "empresa": r"EMPRESA:\s*(.+)", "cnpj": r"CNPJ:\s*(.+)",
-        "endereco": r"ENDERECO:\s*(.+)", "cidade": r"CIDADE:\s*(.+)"
+        "empresa": r"EMPRESA:\s*(.+)", 
+        "cnpj": r"CNPJ:\s*(.+)",
+        "endereco": r"ENDERECO:\s*(.+)", 
+        "cidade": r"CIDADE:\s*(.+)"
     }
     for chave, padrao in padroes.items():
         match = re.search(padrao, texto_llm, re.IGNORECASE)
-        if match: dados[chave] = match.group(1).strip()
+        if match:
+            # <<< CIRURGIA: Adicionado .strip("'\"") para remover aspas indesejadas.
+            dados[chave] = match.group(1).strip().strip("'\"")
     return dados
+
+### FIM DO NOVO CÓDIGO ###
 
 def processar_pdf_completo(arquivo_pdf, api_key):
     try:
@@ -432,6 +441,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
