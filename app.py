@@ -191,6 +191,9 @@ def carregar_ou_construir_cerebro():
 ### INÍCIO DO NOVO CÓDIGO ###
 
 # --- FUNÇÃO DE GERAR PDF FINAL ---
+### INÍCIO DO NOVO CÓDIGO ###
+
+# --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -239,14 +242,20 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf.set_font("Arial", "", 11)
     pdf.cell(0, 10, linha_cidade_data.encode('latin-1', 'replace').decode('latin-1'), ln=True, align="C")
     
-    # --- CIRURGIA FINAL: Aumento da imagem da assinatura ---
+    # --- CIRURGIA FINAL: Reposicionamento da imagem da assinatura ---
     if os.path.exists("assinatura.png"):
-        # <<< CIRURGIA 1: Largura da assinatura dobrada para 100mm >>>
-        assinatura_w = 100
-        assinatura_x = (pdf.w - assinatura_w) / 2
-        pdf.image("assinatura.png", x=assinatura_x, y=pdf.get_y() + 5, w=assinatura_w)
+        assinatura_w = 100 # Largura mantida em 100mm
         
-        # <<< CIRURGIA 2: Espaço vertical aumentado para acomodar a imagem maior >>>
+        # <<< CIRURGIA 1: Deslocamento para a DIREITA >>>
+        # Pega o centro da página e adiciona 30mm (3cm)
+        assinatura_x = ((pdf.w - assinatura_w) / 2) + 30
+        
+        # <<< CIRURGIA 2: Deslocamento para CIMA >>>
+        # Pega a posição atual e subtrai 5mm (sobe 0.5cm)
+        assinatura_y = pdf.get_y() - 5
+        
+        pdf.image("assinatura.png", x=assinatura_x, y=assinatura_y, w=assinatura_w)
+        
         pdf.ln(30) 
     else:
         pdf.ln(15)
@@ -260,6 +269,7 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     
     return pdf.output(dest="S").encode("latin-1", "replace")
 
+### FIM DO NOVO CÓDIGO ###
 ### FIM DO NOVO CÓDIGO ###
 # --- INTERFACE PRINCIPAL ---
 vectorstore = carregar_ou_construir_cerebro()
@@ -439,6 +449,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
