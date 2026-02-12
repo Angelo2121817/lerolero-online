@@ -78,6 +78,8 @@ def extrair_dados_cadastrais_do_texto(texto_llm):
             dados[chave] = match.group(1).strip()
     return dados
 
+### INÍCIO DO NOVO CÓDIGO ###
+
 def processar_pdf_completo(arquivo_pdf, api_key):
     try:
         reader = PdfReader(arquivo_pdf)
@@ -93,7 +95,7 @@ def processar_pdf_completo(arquivo_pdf, api_key):
 
         llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.0, api_key=api_key)
 
-        # Prompt para dados cadastrais
+        # Prompt para dados cadastrais (mantido igual)
         template_dados = """
         Analise o texto da licença ambiental abaixo e extraia os dados do LICENCIADO.
         TEXTO: {texto}
@@ -106,16 +108,17 @@ def processar_pdf_completo(arquivo_pdf, api_key):
         chain_dados = ChatPromptTemplate.from_template(template_dados) | llm
         dados_cadastrais = chain_dados.invoke({"texto": texto_completo[:4000]}).content
 
-        # Prompt para exigências técnicas
+        # <<< CIRURGIA: Adicionamos uma regra explícita para o modelo não "conversar".
         template_exigencias = """
         Analise o texto da Licença Ambiental.
         SUA MISSÃO: Listar todas as EXIGÊNCIAS TÉCNICAS que o cliente precisa cumprir.
         REGRAS:
-        1. Ignore leis, artigos e preâmbulos.
-        2. Copie o texto fiel da exigência.
-        3. Separe cada exigência EXCLUSIVAMENTE com o delimitador "###".
+        1. NUNCA escreva textos introdutórios como "Aqui estão as exigências...".
+        2. Ignore leis, artigos e preâmbulos.
+        3. Copie o texto fiel da exigência.
+        4. Separe cada exigência EXCLUSIVAMENTE com o delimitador "###".
         TEXTO: {texto}
-        LISTA DE EXIGÊNCIAS (Separadas por ###):
+        RESPOSTA (APENAS AS EXIGÊNCIAS, SEM NADA ANTES OU DEPOIS):
         """
         chain_exig = ChatPromptTemplate.from_template(template_exigencias) | llm
         lista_exigencias = chain_exig.invoke({"texto": texto_completo}).content
@@ -123,6 +126,8 @@ def processar_pdf_completo(arquivo_pdf, api_key):
         return dados_cadastrais, lista_exigencias
     except Exception as e:
         return f"ERRO: {e}", f"ERRO: {e}"
+
+### FIM DO NOVO CÓDIGO ###
 
 def processar_apenas_cadastro(arquivo_pdf, api_key):
     try:
@@ -422,5 +427,6 @@ if st.session_state.relatorio:
     )
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
