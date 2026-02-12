@@ -194,6 +194,9 @@ def carregar_ou_construir_cerebro():
 ### INÍCIO DO NOVO CÓDIGO ###
 
 # --- FUNÇÃO DE GERAR PDF FINAL ---
+### INÍCIO DO NOVO CÓDIGO ###
+
+# --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -244,15 +247,15 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     
     # --- CIRURGIA FINAL: Reposicionamento da imagem da assinatura ---
     if os.path.exists("assinatura.png"):
-        assinatura_w = 100 # Largura mantida em 100mm
+        assinatura_w = 100
         
-        # <<< CIRURGIA 1: Deslocamento para a DIREITA >>>
-        # Pega o centro da página e adiciona 30mm (3cm)
-        assinatura_x = ((pdf.w - assinatura_w) / 2) + 30
+        # <<< CIRURGIA 1: Deslocamento para a ESQUERDA >>>
+        # Pega a posição anterior (centro + 3cm) e recua 2cm (20mm)
+        assinatura_x = ((pdf.w - assinatura_w) / 2) + 10 # (30 - 20 = 10)
         
         # <<< CIRURGIA 2: Deslocamento para CIMA >>>
-        # Pega a posição atual e subtrai 5mm (sobe 0.5cm)
-        assinatura_y = pdf.get_y() - 5
+        # Pega a posição atual e subtrai 30mm (sobe 3cm)
+        assinatura_y = pdf.get_y() - 30
         
         pdf.image("assinatura.png", x=assinatura_x, y=assinatura_y, w=assinatura_w)
         
@@ -449,6 +452,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
