@@ -1,14 +1,17 @@
-### INÍCIO DO ARQUIVO COMPLETO: app.py (VERSÃO FINAL PARA DEPLOY) ###
+### INÍCIO DO CÓDIGO FINAL - app.py ###
 
 import streamlit as st
 import os
 import datetime
+import glob
 from pypdf import PdfReader
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from fpdf import FPDF
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.document_loaders import PyPDFLoader, TextLoader, Docx2txtLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Sistema de Defesa Ambiental", layout="wide")
@@ -118,45 +121,50 @@ def consultar_ia(exigencia, vectorstore, api_key, temperatura=0.0):
     contexto = "\n".join([d.page_content for d in docs])
     llm = ChatGroq(model="llama3-70b-8192", temperature=temperatura, api_key=api_key)
     template = f"""
-    Você é um redator técnico ambiental.
-    TAREFA: Responder tecnicamente à exigência.
-    REGRAS DE OURO:
-    1. SEJA SUCINTO. Maximo 3 parágrafos curtos.
-    2. IMPESSOALIDADE TOTAL: Não use nomes de pessoas (General) nem de empresas.
-    3. Use voz passiva: "Foi realizado", "Mantém-se".
-    4. NÃO repita a pergunta. Vá direto à solução técnica.
-    CONTEXTO (Gabarito):
-    {{context}}
-    EXIGÊNCIA:
-    {{question}}
-    RESPOSTA TÉCNICA:
+    Você é um redator técnico ambiental. TAREFA: Responder tecnicamente à exigência. REGRAS DE OURO: 1. SEJA SUCINTO. Maximo 3 parágrafos curtos. 2. IMPESSOALIDADE TOTAL: Não use nomes de pessoas (General) nem de empresas. 3. Use voz passiva: "Foi realizado", "Mantém-se". 4. NÃO repita a pergunta. Vá direto à solução técnica. CONTEXTO (Gabarito): {{context}} EXIGÊNCIA: {{question}} RESPOSTA TÉCNICA:
     """
     chain = ChatPromptTemplate.from_template(template) | llm
     return chain.invoke({"context": contexto, "question": exigencia}).content
 
-# --- CÉREBRO (CARREGADOR DO BANCO DE DADOS) ---
-@st.cache_resource
-def carregar_cerebro():
-    # --- MUDANÇA PARA DEPLOY: Usando caminhos relativos ---
+# --- FUNÇÃO PARA CONSTRUIR O CÉREBRO ---
+def construir_cerebro():
+    PASTA_DOCUMENTOS = "pdfs_cetesb"
     NOME_BANCO = "banco_chroma"
     MODELO_EMBEDDINGS = "all-MiniLM-L6-v2"
-    
+    documentos = []
+    loaders = {".pdf": PyPDFLoader, ".txt": TextLoader, ".docx": Docx2txtLoader}
+    for extensao, loader_class in loaders.items():
+        caminho_busca = os.path.join(PASTA_DOCUMENTOS, f"**/*{extensao}")
+        arquivos_encontrados = glob.glob(caminho_busca, recursive=True)
+        if arquivos_encontrados:
+            for arquivo_path in arquivos_encontrados:
+                try:
+                    loader = loader_class(arquivo_path)
+                    documentos.extend(loader.load())
+                except Exception as e:
+                    print(f"Falha ao ler o arquivo {arquivo_path}: {e}")
+    if not documentos: return None
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splits = text_splitter.split_documents(documentos)
     embedding_function = HuggingFaceEmbeddings(model_name=MODELO_EMBEDDINGS)
-    
+    vectorstore = Chroma.from_documents(documents=splits, embedding=embedding_function, persist_directory=NOME_BANCO)
+    return vectorstore
+
+# --- FUNÇÃO PARA CARREGAR OU CONSTRUIR O CÉREBRO ---
+@st.cache_resource
+def carregar_ou_construir_cerebro():
+    NOME_BANCO = "banco_chroma"
     if os.path.exists(NOME_BANCO):
-        print(f"🧠 Carregando cérebro ChromaDB da pasta '{NOME_BANCO}'...")
-        vectorstore = Chroma(
-            persist_directory=NOME_BANCO, 
-            embedding_function=embedding_function
-        )
-        print("✅ Cérebro carregado com sucesso!")
+        embedding_function = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        vectorstore = Chroma(persist_directory=NOME_BANCO, embedding_function=embedding_function)
         return vectorstore
     else:
-        return None
+        with st.spinner("Construindo a base de conhecimento. Isso pode levar alguns minutos..."):
+            vectorstore = construir_cerebro()
+        return vectorstore
 
 # --- INÍCIO DA INTERFACE STREAMLIT ---
-
-vectorstore = carregar_cerebro()
+vectorstore = carregar_ou_construir_cerebro()
 
 if "relatorio" not in st.session_state: st.session_state.relatorio = []
 if "fila_exigencias" not in st.session_state: st.session_state.fila_exigencias = []
@@ -165,14 +173,12 @@ if "dados_auto" not in st.session_state: st.session_state.dados_auto = {"empresa
 # BARRA LATERAL
 with st.sidebar:
     st.header("🔑 Acesso")
-    # --- VERSÃO SEGURA PARA DEPLOY ---
     try:
         api_key = st.secrets["GROQ_API_KEY"]
         st.success("Chave API carregada!")
     except:
         st.error("Chave 'GROQ_API_KEY' não encontrada. Adicione-a aos segredos do seu app no Streamlit Cloud.")
         st.stop()
-        
     st.header("📂 Operação com PDF")
     uploaded_file = st.file_uploader("Subir Licença (PDF)", type="pdf")
     if uploaded_file:
@@ -217,7 +223,7 @@ with st.sidebar:
 st.title("🛡️ SISTEMA DE DEFESA AMBIENTAL")
 
 if not vectorstore:
-    st.error("Cérebro não encontrado. Rode 'treinar.py' para criar o banco de dados vetorial.")
+    st.error("Cérebro não encontrado ou falha na construção. Verifique os logs do servidor.")
     st.stop()
 
 col1, col2 = st.columns([1, 1])
@@ -283,11 +289,4 @@ for i, item in enumerate(st.session_state.relatorio):
     with st.expander(f"{item['titulo']}"):
         st.write(item['resposta'])
         if st.button("X", key=f"d{i}"):
-            st.session_state.relatorio.pop(i)
-            st.rerun()
-
-if st.session_state.relatorio:
-    pdf = gerar_pdf_final(st.session_state.relatorio, INPUT_EMPRESA, INPUT_CNPJ, INPUT_ENDERECO, INPUT_CIDADE, INPUT_NOME, INPUT_CARGO)
-    st.download_button("📄 BAIXAR PDF", pdf, "Relatorio.pdf", "application/pdf", type="primary")
-
-### FIM DO ARQUIVO COMPLETO: app.py (VERSÃO FINAL PARA DEPLOY) ###
+            st.session_state.relatorio.pop(i)*
