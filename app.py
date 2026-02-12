@@ -1,4 +1,4 @@
-### INÍCIO DO CÓDIGO FINAL v2 - app.py ###
+### INÍCIO DO CÓDIGO FINAL v3 - app.py ###
 
 import streamlit as st
 import os
@@ -22,8 +22,8 @@ def processar_pdf_completo(arquivo_pdf, api_key):
     texto_completo = ""
     for page in reader.pages:
         texto_completo += page.extract_text() + "\n"
-    # --- ALTERAÇÃO 1: Trocando o modelo para um mais estável ---
-    llm = ChatGroq(model="llama3-8b-8192", temperature=0.0, api_key=api_key)
+    # --- ALTERAÇÃO 1: Trocando para o modelo Gemma ---
+    llm = ChatGroq(model="gemma-7b-it", temperature=0.0, api_key=api_key)
     template_dados = """
     Analise o texto da licença. Extraia dados do LICENCIADO.
     TEXTO: {texto}
@@ -56,8 +56,8 @@ def processar_apenas_cadastro(arquivo_pdf, api_key):
     for i, page in enumerate(reader.pages):
         if i > 2: break 
         texto_completo += page.extract_text() + "\n"
-    # --- ALTERAÇÃO (consistência): Trocando o modelo para um mais estável ---
-    llm = ChatGroq(model="llama3-8b-8192", temperature=0.0, api_key=api_key)
+    # --- ALTERAÇÃO (consistência): Trocando para o modelo Gemma ---
+    llm = ChatGroq(model="gemma-7b-it", temperature=0.0, api_key=api_key)
     template_dados = """
     Analise o texto da licença. Extraia dados do LICENCIADO.
     TEXTO: {texto}
@@ -121,8 +121,8 @@ def gerar_pdf_final(itens, empresa, cnpj, endereco, cidade, nome, cargo):
 def consultar_ia(exigencia, vectorstore, api_key, temperatura=0.0):
     docs = vectorstore.similarity_search(exigencia, k=3)
     contexto = "\n".join([d.page_content for d in docs])
-    # --- ALTERAÇÃO 2: Trocando o modelo para um mais estável ---
-    llm = ChatGroq(model="llama3-8b-8192", temperature=temperatura, api_key=api_key)
+    # --- ALTERAÇÃO 2: Trocando para o modelo Gemma ---
+    llm = ChatGroq(model="gemma-7b-it", temperature=temperatura, api_key=api_key)
     template = f"""
     Você é um redator técnico ambiental. TAREFA: Responder tecnicamente à exigência. REGRAS DE OURO: 1. SEJA SUCINTO. Maximo 3 parágrafos curtos. 2. IMPESSOALIDADE TOTAL: Não use nomes de pessoas (General) nem de empresas. 3. Use voz passiva: "Foi realizado", "Mantém-se". 4. NÃO repita a pergunta. Vá direto à solução técnica. CONTEXTO (Gabarito): {{context}} EXIGÊNCIA: {{question}} RESPOSTA TÉCNICA:
     """
@@ -299,4 +299,4 @@ if st.session_state.relatorio:
     pdf = gerar_pdf_final(st.session_state.relatorio, INPUT_EMPRESA, INPUT_CNPJ, INPUT_ENDERECO, INPUT_CIDADE, INPUT_NOME, INPUT_CARGO)
     st.download_button("📄 BAIXAR PDF", pdf, "Relatorio.pdf", "application/pdf", type="primary")
 
-### FIM DO CÓDIGO FINAL v2 - app.py ###
+### FIM DO CÓDIGO FINAL v3 - app.py ###
