@@ -342,38 +342,72 @@ with col1:
             st.session_state.editor_exigencia = ""
             if "editor_indice" in st.session_state: del st.session_state.editor_indice
             st.rerun()
+### INÍCIO DO NOVO CÓDIGO ###
+
 with col2:
     st.subheader("2. Editor Técnico")
     if "editor_exigencia" in st.session_state:
-       ### INÍCIO DO NOVO CÓDIGO ###
-
         # Configurações de resposta
-        modo = st.radio("Profundidade da Resposta:", ["curta", "media", "avancada"], index=0, horizontal=True) # <<< CIRURGIA: Alterado o 'index' de 1 para 0
-
-### FIM DO NOVO CÓDIGO ###
+        modo = st.radio("Profundidade da Resposta:", ["curta", "media", "avancada"], index=0, horizontal=True) # Mantém a resposta curta como padrão
+        
         tit_sugerido = f"Item {len(st.session_state.relatorio) + 1}"
         titulo_item = st.text_input("Título do Relatório:", tit_sugerido)
         texto_exigencia = st.text_area("Exigência:", value=st.session_state.editor_exigencia, height=100)
+        
         if "editor_resposta" not in st.session_state:
             if st.button("GERAR RESPOSTA TÉCNICA ⚡", type="primary"):
-                with st.spinner("Consultando base técnica..."):
-                    resposta = consultar_ia(texto_exigencia, vectorstore, api_key, modo=modo)
-                    st.session_state.editor_resposta = resposta
-                    st.rerun()
+                if not vectorstore:
+                    st.error("Base de conhecimento não encontrada. Resposta não pode ser gerada.")
+                else:
+                    with st.spinner("Consultando base técnica..."):
+                        resposta = consultar_ia(texto_exigencia, vectorstore, api_key, modo=modo)
+                        st.session_state.editor_resposta = resposta
+                        st.rerun()
+        
         if "editor_resposta" in st.session_state:
             resposta_final = st.text_area("Resposta da IA (Editável):", value=st.session_state.editor_resposta, height=200)
+            
             c1, c2 = st.columns(2)
             if c1.button("✅ APROVAR E SALVAR"):
-                st.session_state.relatorio.append({"titulo": titulo_item, "exigencia": texto_exigencia, "resposta": resposta_final})
-                idx = st.session_state.get("editor_indice", -1)
-                if 0 <= idx < len(st.session_state.fila_exigencias):
-                    st.session_state.fila_exigencias.pop(idx)
-                del st.session_state.editor_exigencia; del st.session_state.editor_resposta
+                # 1. Salva o item atual no relatório
+                st.session_state.relatorio.append({
+                    "titulo": titulo_item, 
+                    "exigencia": texto_exigencia, 
+                    "resposta": resposta_final
+                })
+                
+                # 2. Remove o item da fila de exigências
+                idx_antigo = st.session_state.get("editor_indice", -1)
+                if 0 <= idx_antigo < len(st.session_state.fila_exigencias):
+                    st.session_state.fila_exigencias.pop(idx_antigo)
+                
+                # <<< CIRURGIA: Lógica para avançar para o próximo item automaticamente >>>
+                
+                # 3. Limpa a resposta do editor atual
+                del st.session_state.editor_resposta
+                
+                # 4. Verifica se ainda há itens na fila
+                if st.session_state.fila_exigencias:
+                    # Pega o próximo item (que agora está no mesmo índice do que foi removido)
+                    # Garante que o índice não seja maior que a lista
+                    novo_idx = min(idx_antigo, len(st.session_state.fila_exigencias) - 1)
+                    
+                    # Prepara o editor para o próximo item
+                    st.session_state.editor_exigencia = st.session_state.fila_exigencias[novo_idx]
+                    st.session_state.editor_indice = novo_idx
+                else:
+                    # Se a fila acabou, limpa o editor completamente
+                    del st.session_state.editor_exigencia
+                
+                # 5. Reinicia a página para mostrar o próximo item ou a tela limpa
                 st.rerun()
+                
             if c2.button("❌ CANCELAR"):
                 del st.session_state.editor_exigencia
                 if "editor_resposta" in st.session_state: del st.session_state.editor_resposta
                 st.rerun()
+
+### FIM DO NOVO CÓDIGO ###
 st.markdown("---")
 st.subheader("3. Visualização do Relatório")
 if st.session_state.relatorio:
@@ -389,6 +423,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
