@@ -176,30 +176,74 @@ def carregar_ou_construir_cerebro():
         return Chroma(persist_directory=NOME_BANCO, embedding_function=embedding_function)
     return construir_cerebro()
 
+### INÍCIO DO NOVO CÓDIGO ###
+
+# --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
-    pdf = FPDF(); pdf.set_auto_page_break(auto=True, margin=15); pdf.add_page()
-    pdf.set_font("Arial", "B", 16); pdf.cell(0, 10, str(empresa).encode('latin-1', 'replace').decode('latin-1'), ln=True, align="C")
-    pdf.set_font("Arial", "B", 12); pdf.cell(0, 10, "RELATORIO DE ATENDIMENTO AS EXIGENCIAS TECNICAS", ln=True, align="C"); pdf.ln(10)
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    
+    # Cabeçalho
+    pdf.set_font("Arial", "B", 16)
+    empresa_l = str(empresa).encode('latin-1', 'replace').decode('latin-1')
+    pdf.cell(0, 10, empresa_l, ln=True, align="C")
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 10, "RELATORIO DE ATENDIMENTO AS EXIGENCIAS TECNICAS", ln=True, align="C")
+    pdf.ln(10)
+    
     for item in itens:
-        pdf.set_font("Arial", "B", 11); pdf.set_fill_color(230, 230, 230)
-        pdf.cell(0, 8, str(item['titulo']).encode('latin-1', 'replace').decode('latin-1'), ln=True, fill=True); pdf.ln(2)
+        # Título do Item
+        pdf.set_font("Arial", "B", 11)
+        pdf.set_fill_color(230, 230, 230)
+        tit = str(item['titulo']).encode('latin-1', 'replace').decode('latin-1')
+        
+        # <<< CIRURGIA: Adicionado align="C" para centralizar o título do item.
+        pdf.cell(0, 8, tit, ln=True, fill=True, align="C")
+        
+        pdf.ln(2)
+        
+        # Texto da Exigência
         if item['exigencia']:
-            pdf.set_font("Arial", "I", 9); pdf.set_text_color(100, 100, 100)
-            pdf.multi_cell(0, 5, f"Exigencia: {str(item['exigencia'])}".encode('latin-1', 'replace').decode('latin-1')); pdf.ln(2)
-        pdf.set_text_color(0, 0, 0); pdf.set_font("Arial", "", 10)
-        pdf.multi_cell(0, 5, str(item['resposta']).encode('latin-1', 'replace').decode('latin-1')); pdf.ln(8)
+            pdf.set_font("Arial", "I", 9)
+            pdf.set_text_color(100, 100, 100)
+            exi = f"Exigencia: {str(item['exigencia'])}".encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(0, 5, exi)
+            pdf.ln(2)
+            
+        # Resposta Técnica
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", "", 10)
+        res = str(item['resposta']).encode('latin-1', 'replace').decode('latin-1')
+        pdf.multi_cell(0, 5, res)
+        pdf.ln(8)
+        
+    # Assinatura
     if pdf.get_y() > 240: pdf.add_page()
-    pdf.ln(10); pdf.set_font("Arial", "I", 10)
+    pdf.ln(10)
+    pdf.set_font("Arial", "I", 10)
     hoje = datetime.date.today()
-    meses = {"01": "janeiro", "02": "fevereiro", "03": "março", "04": "abril", "05": "maio", "06": "junho", "07": "julho", "08": "agosto", "09": "setembro", "10": "outubro", "11": "novembro", "12": "dezembro"}
+    meses = {
+        "01": "janeiro", "02": "fevereiro", "03": "março", "04": "abril", 
+        "05": "maio", "06": "junho", "07": "julho", "08": "agosto", 
+        "09": "setembro", "10": "outubro", "11": "novembro", "12": "dezembro"
+    }
     data_formatada = f"{hoje.day} de {meses[hoje.strftime('%m')]} de {hoje.year}"
     cidade_limpa = str(cidade).strip().strip("'\"")
-    pdf.cell(0, 10, f"{cidade_limpa.encode('latin-1', 'replace').decode('latin-1')}, {data_formatada}", ln=True, align="C")
+    cid_l = cidade_limpa.encode('latin-1', 'replace').decode('latin-1')
+    pdf.cell(0, 10, f"{cid_l}, {data_formatada}", ln=True, align="C")
     pdf.ln(15) # <-- ESPAÇO EXTRA ANTES DA ASSINATURA
     pdf.line(60, pdf.get_y(), 150, pdf.get_y())
-    pdf.set_font("Arial", "B", 11); pdf.cell(0, 7, str(nome).encode('latin-1', 'replace').decode('latin-1'), ln=True, align="C")
-    pdf.set_font("Arial", "", 10); pdf.cell(0, 5, str(cargo).encode('latin-1', 'replace').decode('latin-1'), ln=True, align="C")
+    pdf.set_font("Arial", "B", 11)
+    nom_l = str(nome).encode('latin-1', 'replace').decode('latin-1')
+    pdf.cell(0, 7, nom_l, ln=True, align="C")
+    pdf.set_font("Arial", "", 10)
+    car_l = str(cargo).encode('latin-1', 'replace').decode('latin-1')
+    pdf.cell(0, 5, car_l, ln=True, align="C")
+    
     return pdf.output(dest="S").encode("latin-1", "replace")
+
+### FIM DO NOVO CÓDIGO ###
 
 # --- INTERFACE PRINCIPAL ---
 vectorstore = carregar_ou_construir_cerebro()
@@ -345,5 +389,6 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
