@@ -86,7 +86,7 @@ def processar_pdf_completo(arquivo_pdf, api_key):
         if not texto_completo.strip():
             return "ERRO: Texto não extraído.", "ERRO: Texto não extraído."
 
-        llm = ChatGroq(model="gemma-7b-it", temperature=0.0, api_key=api_key)
+        llm = ChatGroq(model="gemma2-9b-it", temperature=0.0, api_key=api_key)
 
         # Prompt para dados cadastrais
         template_dados = """
@@ -127,7 +127,7 @@ def processar_apenas_cadastro(arquivo_pdf, api_key):
             if i > 2: break # Lê apenas as primeiras páginas para cadastro
             texto_curto += page.extract_text() + "\n"
             
-        llm = ChatGroq(model="gemma-7b-it", temperature=0.0, api_key=api_key)
+        llm = ChatGroq(model="gemma2-9b-it", temperature=0.0, api_key=api_key)
         template_dados = """
         Extraia os dados cadastrais.
         TEXTO: {texto}
@@ -147,7 +147,7 @@ def consultar_ia(exigencia, vectorstore, api_key, temperatura=0.0, modo="media")
     docs = vectorstore.similarity_search(exigencia, k=3)
     contexto = "\n".join([d.page_content for d in docs])
     
-    llm = ChatGroq(model="gemma-7b-it", temperature=temperatura, api_key=api_key)
+    llm = ChatGroq(model="gemma2-9b-it", temperature=temperatura, api_key=api_key)
     
     instrucoes_modo = {
         "curta": "ESTILO: CURTO E GROSSO. FOCO: Diga apenas que a exigência foi cumprida.",
