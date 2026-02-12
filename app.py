@@ -78,8 +78,6 @@ def extrair_dados_cadastrais_do_texto(texto_llm):
             dados[chave] = match.group(1).strip()
     return dados
 
-### INÍCIO DO NOVO CÓDIGO ###
-
 def processar_pdf_completo(arquivo_pdf, api_key):
     try:
         reader = PdfReader(arquivo_pdf)
@@ -95,7 +93,7 @@ def processar_pdf_completo(arquivo_pdf, api_key):
 
         llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.0, api_key=api_key)
 
-        # Prompt para dados cadastrais (mantido igual)
+        # Prompt para dados cadastrais
         template_dados = """
         Analise o texto da licença ambiental abaixo e extraia os dados do LICENCIADO.
         TEXTO: {texto}
@@ -108,17 +106,16 @@ def processar_pdf_completo(arquivo_pdf, api_key):
         chain_dados = ChatPromptTemplate.from_template(template_dados) | llm
         dados_cadastrais = chain_dados.invoke({"texto": texto_completo[:4000]}).content
 
-        # <<< CIRURGIA: Adicionamos uma regra explícita para o modelo não "conversar".
+        # Prompt para exigências técnicas
         template_exigencias = """
         Analise o texto da Licença Ambiental.
         SUA MISSÃO: Listar todas as EXIGÊNCIAS TÉCNICAS que o cliente precisa cumprir.
         REGRAS:
-        1. NUNCA escreva textos introdutórios como "Aqui estão as exigências...".
-        2. Ignore leis, artigos e preâmbulos.
-        3. Copie o texto fiel da exigência.
-        4. Separe cada exigência EXCLUSIVAMENTE com o delimitador "###".
+        1. Ignore leis, artigos e preâmbulos.
+        2. Copie o texto fiel da exigência.
+        3. Separe cada exigência EXCLUSIVAMENTE com o delimitador "###".
         TEXTO: {texto}
-        RESPOSTA (APENAS AS EXIGÊNCIAS, SEM NADA ANTES OU DEPOIS):
+        LISTA DE EXIGÊNCIAS (Separadas por ###):
         """
         chain_exig = ChatPromptTemplate.from_template(template_exigencias) | llm
         lista_exigencias = chain_exig.invoke({"texto": texto_completo}).content
@@ -126,8 +123,6 @@ def processar_pdf_completo(arquivo_pdf, api_key):
         return dados_cadastrais, lista_exigencias
     except Exception as e:
         return f"ERRO: {e}", f"ERRO: {e}"
-
-### FIM DO NOVO CÓDIGO ###
 
 def processar_apenas_cadastro(arquivo_pdf, api_key):
     try:
@@ -253,29 +248,18 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     if pdf.get_y() > 240: pdf.add_page()
     pdf.ln(10)
     pdf.set_font("Arial", "I", 10)
+    hoje = datetime.date.today().strftime('%d/%m/%Y')
+    cid_l = str(cidade).encode('latin-1', 'replace').decode('latin-1')
+    pdf.cell(0, 10, f"{cid_l}, {hoje}", ln=True, align="C")
     
-    hoje = datetime.date.today()
-    meses = {
-        "01": "janeiro", "02": "fevereiro", "03": "março", "04": "abril", 
-        "05": "maio", "06": "junho", "07": "julho", "08": "agosto", 
-        "09": "setembro", "10": "outubro", "11": "novembro", "12": "dezembro"
-    }
-    data_formatada = f"{hoje.day} de {meses[hoje.strftime('%m')]} de {hoje.year}"
+    # <<< CIRURGIA: Aumentamos o espaço aqui de 5 para 20 para descer a assinatura
+    pdf.ln(20) 
     
-    cidade_limpa = str(cidade).strip().strip("'\"")
-    cid_l = cidade_limpa.encode('latin-1', 'replace').decode('latin-1')
-    
-    pdf.cell(0, 10, f"{cid_l}, {data_formatada}", ln=True, align="C")
-    
-    pdf.ln(5)
     pdf.line(60, pdf.get_y(), 150, pdf.get_y())
     pdf.set_font("Arial", "B", 11)
     nom_l = str(nome).encode('latin-1', 'replace').decode('latin-1')
     pdf.cell(0, 7, nom_l, ln=True, align="C")
-    
-    # <<< CIRURGIA: Corrigido o erro de digitação de 'latin-in-1' para 'latin-1'
     car_l = str(cargo).encode('latin-1', 'replace').decode('latin-1')
-    
     pdf.set_font("Arial", "", 10)
     pdf.cell(0, 5, car_l, ln=True, align="C")
     
@@ -438,8 +422,4 @@ if st.session_state.relatorio:
     )
 else:
     st.info("Ainda não há itens aprovados no relatório.")
-
-
-
-
 
