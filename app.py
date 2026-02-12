@@ -200,6 +200,9 @@ def carregar_ou_construir_cerebro():
     return construir_cerebro()
 
 # --- FUNÇÃO DE GERAR PDF FINAL ---
+### INÍCIO DO NOVO CÓDIGO ###
+
+# --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -243,7 +246,10 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     hoje = datetime.date.today().strftime('%d/%m/%Y')
     cid_l = str(cidade).encode('latin-1', 'replace').decode('latin-1')
     pdf.cell(0, 10, f"{cid_l}, {hoje}", ln=True, align="C")
-    pdf.ln(5)
+    
+    # <<< CIRURGIA: Aumentamos o espaço aqui de 5 para 20 para descer a assinatura
+    pdf.ln(20) 
+    
     pdf.line(60, pdf.get_y(), 150, pdf.get_y())
     pdf.set_font("Arial", "B", 11)
     nom_l = str(nome).encode('latin-1', 'replace').decode('latin-1')
@@ -253,6 +259,8 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf.cell(0, 5, car_l, ln=True, align="C")
     
     return pdf.output(dest="S").encode("latin-1", "replace")
+
+### FIM DO NOVO CÓDIGO ###
 
 # --- INTERFACE PRINCIPAL ---
 
@@ -409,3 +417,4 @@ if st.session_state.relatorio:
     )
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
