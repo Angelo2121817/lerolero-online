@@ -213,9 +213,6 @@ def carregar_ou_construir_cerebro():
 ### INÍCIO DO NOVO CÓDIGO ###
 
 # --- FUNÇÃO DE GERAR PDF FINAL ---
-### INÍCIO DO NOVO CÓDIGO ###
-
-# --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -257,7 +254,6 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf.ln(10)
     pdf.set_font("Arial", "I", 10)
     
-    # <<< CIRURGIA 1: Lógica para formatar a data por extenso em português.
     hoje = datetime.date.today()
     meses = {
         "01": "janeiro", "02": "fevereiro", "03": "março", "04": "abril", 
@@ -266,7 +262,6 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     }
     data_formatada = f"{hoje.day} de {meses[hoje.strftime('%m')]} de {hoje.year}"
     
-    # <<< CIRURGIA 2: Limpa aspas e espaços extras da cidade antes de usar.
     cidade_limpa = str(cidade).strip().strip("'\"")
     cid_l = cidade_limpa.encode('latin-1', 'replace').decode('latin-1')
     
@@ -277,13 +272,15 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf.set_font("Arial", "B", 11)
     nom_l = str(nome).encode('latin-1', 'replace').decode('latin-1')
     pdf.cell(0, 7, nom_l, ln=True, align="C")
-    car_l = str(cargo).encode('latin-in-1', 'replace').decode('latin-1')
+    
+    # <<< CIRURGIA: Corrigido o erro de digitação de 'latin-in-1' para 'latin-1'
+    car_l = str(cargo).encode('latin-1', 'replace').decode('latin-1')
+    
     pdf.set_font("Arial", "", 10)
     pdf.cell(0, 5, car_l, ln=True, align="C")
     
     return pdf.output(dest="S").encode("latin-1", "replace")
 
-### FIM DO NOVO CÓDIGO ###
 ### FIM DO NOVO CÓDIGO ###
 
 # --- INTERFACE PRINCIPAL ---
@@ -441,6 +438,7 @@ if st.session_state.relatorio:
     )
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
