@@ -1,0 +1,13 @@
+# Arquivos e pastas do Python
+__pycache__/
+*.pyc
+    
+# Banco de dados vetorial (será criado no servidor)
+banco_chroma/
+    
+# Arquivos de segredos locais (NUNCA SUBIR)
+.streamlit/
+secrets.toml
+    
+# Outros arquivos de ambiente
+    .env
