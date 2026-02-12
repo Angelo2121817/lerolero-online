@@ -204,29 +204,52 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
 # --- INTERFACE PRINCIPAL ---
 vectorstore = carregar_ou_construir_cerebro()
 
+### INÍCIO DO NOVO CÓDIGO ###
+
 with st.sidebar:
     st.header("🔑 Acesso")
     try:
+        # A chave é carregada silenciosamente. Se falhar, o app para.
         api_key = st.secrets["GROQ_API_KEY"]
-        st.success("Chave API carregada!")
     except:
-        st.error("Chave 'GROQ_API_KEY' não encontrada."); st.stop()
+        st.error("Chave 'GROQ_API_KEY' não encontrada.")
+        st.stop()
+
+    # <<< CIRURGIA 1: Botão para zerar a sessão.
+    if st.button("Nova Análise 🔄"):
+        # Limpa todas as variáveis de sessão para recomeçar
+        st.session_state.relatorio = []
+        st.session_state.fila_exigencias = []
+        st.session_state.dados_auto = {"empresa": "", "cnpj": "", "endereco": "", "cidade": ""}
+        # Limpa também os estados temporários do editor, se existirem
+        if "editor_exigencia" in st.session_state:
+            del st.session_state.editor_exigencia
+        if "editor_resposta" in st.session_state:
+            del st.session_state.editor_resposta
+        st.rerun()
+
     st.markdown("---")
     uploaded_file = st.file_uploader("Subir Licença (PDF)", type="pdf")
+    
     if uploaded_file:
         st.markdown("### Selecione a Tática:")
+        
         if st.button("🕵️ IMPORTAR TUDO (AUTO)", type="primary"):
             with st.spinner("Extraindo Dados e Perguntas..."):
                 txt_dados, txt_exigencias = processar_pdf_completo(uploaded_file, api_key)
+                
                 if "ERRO:" in txt_dados:
                     st.error(f"Falha ao processar PDF: {txt_dados}")
                 else:
                     novos_dados = extrair_dados_cadastrais_do_texto(txt_dados)
                     st.session_state.dados_auto.update(novos_dados)
+                    
                     raw_list = txt_exigencias.split('###') if "###" in txt_exigencias else txt_exigencias.split('\n')
+                    
                     st.session_state.fila_exigencias = [item.strip() for item in raw_list if len(item.strip()) > 10]
                     st.success("Processamento concluído!")
                     st.rerun()
+
         if st.button("📝 SÓ CADASTRO (MANUAL)"):
             with st.spinner("Lendo cabeçalho..."):
                 txt_dados = processar_apenas_cadastro(uploaded_file, api_key)
@@ -238,15 +261,19 @@ with st.sidebar:
                     st.session_state.fila_exigencias = [] 
                     st.success("Cadastro preenchido!")
                     st.rerun()
+
     st.markdown("---")
     st.subheader("📝 Dados do Cliente")
     INPUT_EMPRESA = st.text_input("Empresa", st.session_state.dados_auto["empresa"])
     INPUT_CNPJ = st.text_input("CNPJ", st.session_state.dados_auto["cnpj"])
     INPUT_ENDERECO = st.text_input("Endereço", st.session_state.dados_auto["endereco"])
     INPUT_CIDADE = st.text_input("Cidade", st.session_state.dados_auto["cidade"])
+    
     st.markdown("---")
     INPUT_NOME = st.text_input("Assinatura (Nome)", "Engenheiro Responsável")
     INPUT_CARGO = st.text_input("Cargo", "Diretor Técnico")
+
+### FIM DO NOVO CÓDIGO ###
 
 # CORPO DA PÁGINA
 st.title("🛡️ CENTRAL DE DEFESA AMBIENTAL")
@@ -313,3 +340,4 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
