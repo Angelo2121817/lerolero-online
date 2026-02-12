@@ -179,6 +179,9 @@ def carregar_ou_construir_cerebro():
 ### INÍCIO DO NOVO CÓDIGO ###
 
 # --- FUNÇÃO DE GERAR PDF FINAL ---
+### INÍCIO DO NOVO CÓDIGO ###
+
+# --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -189,7 +192,7 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     empresa_l = str(empresa).encode('latin-1', 'replace').decode('latin-1')
     pdf.cell(0, 10, empresa_l, ln=True, align="C")
     pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 10, "RELATORIO DE ATENDIMENTO AS EXIGENCIAS TECNICAS", ln=True, align="C")
+    pdf.cell(0, 10, "RELATORIO DE ATENDimento AS EXIGENCIAS TECNICAS", ln=True, align="C")
     pdf.ln(10)
     
     for item in itens:
@@ -197,10 +200,7 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
         pdf.set_font("Arial", "B", 11)
         pdf.set_fill_color(230, 230, 230)
         tit = str(item['titulo']).encode('latin-1', 'replace').decode('latin-1')
-        
-        # <<< CIRURGIA: Adicionado align="C" para centralizar o título do item.
         pdf.cell(0, 8, tit, ln=True, fill=True, align="C")
-        
         pdf.ln(2)
         
         # Texto da Exigência
@@ -221,7 +221,10 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     # Assinatura
     if pdf.get_y() > 240: pdf.add_page()
     pdf.ln(10)
-    pdf.set_font("Arial", "I", 10)
+    
+    # <<< CIRURGIA 1: Mudando a fonte para Normal, tamanho 11.
+    pdf.set_font("Arial", "", 11) 
+    
     hoje = datetime.date.today()
     meses = {
         "01": "janeiro", "02": "fevereiro", "03": "março", "04": "abril", 
@@ -229,10 +232,14 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
         "09": "setembro", "10": "outubro", "11": "novembro", "12": "dezembro"
     }
     data_formatada = f"{hoje.day} de {meses[hoje.strftime('%m')]} de {hoje.year}"
+    
+    # <<< CIRURGIA 2: Garantindo a limpeza de aspas e espaços.
     cidade_limpa = str(cidade).strip().strip("'\"")
     cid_l = cidade_limpa.encode('latin-1', 'replace').decode('latin-1')
+    
     pdf.cell(0, 10, f"{cid_l}, {data_formatada}", ln=True, align="C")
-    pdf.ln(15) # <-- ESPAÇO EXTRA ANTES DA ASSINATURA
+    
+    pdf.ln(15)
     pdf.line(60, pdf.get_y(), 150, pdf.get_y())
     pdf.set_font("Arial", "B", 11)
     nom_l = str(nome).encode('latin-1', 'replace').decode('latin-1')
@@ -242,6 +249,8 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf.cell(0, 5, car_l, ln=True, align="C")
     
     return pdf.output(dest="S").encode("latin-1", "replace")
+
+### FIM DO NOVO CÓDIGO ###
 
 ### FIM DO NOVO CÓDIGO ###
 
@@ -423,6 +432,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
