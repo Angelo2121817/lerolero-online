@@ -343,7 +343,7 @@ with st.sidebar:
     
     st.markdown("---")
     INPUT_NOME = st.text_input("Assinatura (Nome)", "Ângelo Aparecido Amadeu Júnior")
-    INPUT_CARGO = st.text_input("Cargo", "Diretor Técnico")
+    INPUT_CARGO = st.text_input("Cargo", "Consultor Técnico")
 
 ### FIM DO NOVO CÓDIGO ###
 
@@ -451,6 +451,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
