@@ -196,16 +196,19 @@ def carregar_ou_construir_cerebro():
 ### INÍCIO DO NOVO CÓDIGO ###
 
 # --- FUNÇÃO DE GERAR PDF FINAL ---
+### INÍCIO DO NOVO CÓDIGO ###
+
+# --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     
-    # <<< CIRURGIA FINAL E DEFINITIVA: Limpeza robusta de TODOS os tipos de aspas >>>
-    empresa_limpa = str(empresa).strip().strip("'\"“”")
-    cidade_limpa = str(cidade).strip().strip("'\"“”")
-    nome_limpo = str(nome).strip().strip("'\"“”")
-    cargo_limpo = str(cargo).strip().strip("'\"“”")
+    # <<< CIRURGIA FINAL E DEFINITIVA: Limpeza de ASTERISCOS e todos os tipos de aspas >>>
+    empresa_limpa = str(empresa).strip().strip("'\"“”*")
+    cidade_limpa = str(cidade).strip().strip("'\"“”*")
+    nome_limpo = str(nome).strip().strip("'\"“”*")
+    cargo_limpo = str(cargo).strip().strip("'\"“”*")
 
     # Cabeçalho
     pdf.set_font("Arial", "B", 16)
@@ -253,6 +256,7 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     
     return pdf.output(dest="S").encode("latin-1", "replace")
 
+### FIM DO NOVO CÓDIGO ###
 ### FIM DO NOVO CÓDIGO ###
 ### FIM DO NOVO CÓDIGO ###
 # --- INTERFACE PRINCIPAL ---
@@ -433,6 +437,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
