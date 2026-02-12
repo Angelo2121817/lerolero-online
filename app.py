@@ -190,11 +190,7 @@ def carregar_ou_construir_cerebro():
 
 ### INÍCIO DO NOVO CÓDIGO ###
 
-# --- FUNÇÃO DE GERAR PDF FINAL ---
 ### INÍCIO DO NOVO CÓDIGO ###
-
-# --- FUNÇÃO DE GERAR PDF FINAL ---
-B### INÍCIO DO NOVO CÓDIGO ###
 
 # --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
@@ -265,11 +261,6 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     return pdf.output(dest="S").encode("latin-1", "replace")
 
 ### FIM DO NOVO CÓDIGO ###
-
-### FIM DO NOVO CÓDIGO ###
-
-### FIM DO NOVO CÓDIGO ###
-
 # --- INTERFACE PRINCIPAL ---
 vectorstore = carregar_ou_construir_cerebro()
 
@@ -448,6 +439,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
