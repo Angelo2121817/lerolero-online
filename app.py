@@ -213,6 +213,9 @@ def carregar_ou_construir_cerebro():
 ### INÍCIO DO NOVO CÓDIGO ###
 
 # --- FUNÇÃO DE GERAR PDF FINAL ---
+### INÍCIO DO NOVO CÓDIGO ###
+
+# --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -253,23 +256,34 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     if pdf.get_y() > 240: pdf.add_page()
     pdf.ln(10)
     pdf.set_font("Arial", "I", 10)
-    hoje = datetime.date.today().strftime('%d/%m/%Y')
-    cid_l = str(cidade).encode('latin-1', 'replace').decode('latin-1')
-    pdf.cell(0, 10, f"{cid_l}, {hoje}", ln=True, align="C")
     
-    # <<< CIRURGIA: Aumentamos o espaço aqui de 5 para 20 para descer a assinatura
-    pdf.ln(20) 
+    # <<< CIRURGIA 1: Lógica para formatar a data por extenso em português.
+    hoje = datetime.date.today()
+    meses = {
+        "01": "janeiro", "02": "fevereiro", "03": "março", "04": "abril", 
+        "05": "maio", "06": "junho", "07": "julho", "08": "agosto", 
+        "09": "setembro", "10": "outubro", "11": "novembro", "12": "dezembro"
+    }
+    data_formatada = f"{hoje.day} de {meses[hoje.strftime('%m')]} de {hoje.year}"
     
+    # <<< CIRURGIA 2: Limpa aspas e espaços extras da cidade antes de usar.
+    cidade_limpa = str(cidade).strip().strip("'\"")
+    cid_l = cidade_limpa.encode('latin-1', 'replace').decode('latin-1')
+    
+    pdf.cell(0, 10, f"{cid_l}, {data_formatada}", ln=True, align="C")
+    
+    pdf.ln(5)
     pdf.line(60, pdf.get_y(), 150, pdf.get_y())
     pdf.set_font("Arial", "B", 11)
     nom_l = str(nome).encode('latin-1', 'replace').decode('latin-1')
     pdf.cell(0, 7, nom_l, ln=True, align="C")
-    car_l = str(cargo).encode('latin-1', 'replace').decode('latin-1')
+    car_l = str(cargo).encode('latin-in-1', 'replace').decode('latin-1')
     pdf.set_font("Arial", "", 10)
     pdf.cell(0, 5, car_l, ln=True, align="C")
     
     return pdf.output(dest="S").encode("latin-1", "replace")
 
+### FIM DO NOVO CÓDIGO ###
 ### FIM DO NOVO CÓDIGO ###
 
 # --- INTERFACE PRINCIPAL ---
@@ -427,6 +441,7 @@ if st.session_state.relatorio:
     )
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
