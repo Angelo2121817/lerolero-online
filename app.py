@@ -26,12 +26,17 @@ if "dados_auto" not in st.session_state:
     st.session_state.dados_auto = {"empresa": "", "cnpj": "", "endereco": "", "cidade": ""}
 
 # --- CENTRO DE CONTROLE ESTÉTICO ---
+### INÍCIO DO NOVO CÓDIGO ###
+
+# --- CENTRO DE CONTROLE ESTÉTICO ---
 with st.sidebar:
     st.subheader("🎨 Estilo do Terminal")
     tema = st.selectbox("Selecione o Visual:", [
         "Moderno Executivo", "Hacker Verde", "Cyberpunk Neon", "Papel Digital", 
         "Modo Noturno", "Deep Sea", "Escritório", "Minimalista", "Metal Química", "Sunset"
-    ])
+    ], index=6) # <<< CIRURGIA: Adicionamos o 'index=6' aqui
+
+### FIM DO NOVO CÓDIGO ###
 
 estilos = {
     "Moderno Executivo": {"bg": "#0f172a", "txt": "#f1f5f9", "side": "#1e293b", "btn": "#3b82f6"},
@@ -417,4 +422,5 @@ if st.session_state.relatorio:
     )
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
