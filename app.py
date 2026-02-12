@@ -1,4 +1,4 @@
-### INÍCIO DO CÓDIGO FINAL - app.py ###
+### INÍCIO DO CÓDIGO CORRIGIDO - app.py ###
 
 import streamlit as st
 import os
@@ -289,4 +289,11 @@ for i, item in enumerate(st.session_state.relatorio):
     with st.expander(f"{item['titulo']}"):
         st.write(item['resposta'])
         if st.button("X", key=f"d{i}"):
-            st.session_state.relatorio.pop(i)*
+            st.session_state.relatorio.pop(i)
+            st.rerun()
+
+if st.session_state.relatorio:
+    pdf = gerar_pdf_final(st.session_state.relatorio, INPUT_EMPRESA, INPUT_CNPJ, INPUT_ENDERECO, INPUT_CIDADE, INPUT_NOME, INPUT_CARGO)
+    st.download_button("📄 BAIXAR PDF", pdf, "Relatorio.pdf", "application/pdf", type="primary")
+
+### FIM DO CÓDIGO CORRIGIDO - app.py ###
