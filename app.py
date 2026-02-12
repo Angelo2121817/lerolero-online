@@ -197,6 +197,9 @@ def carregar_ou_construir_cerebro():
 ### INÍCIO DO NOVO CÓDIGO ###
 
 # --- FUNÇÃO DE GERAR PDF FINAL ---
+### INÍCIO DO NOVO CÓDIGO ###
+
+# --- FUNÇÃO DE GERAR PDF FINAL ---
 def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -249,13 +252,13 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     if os.path.exists("assinatura.png"):
         assinatura_w = 100
         
-        # <<< CIRURGIA 1: Deslocamento para a ESQUERDA >>>
-        # Pega a posição anterior (centro + 3cm) e recua 2cm (20mm)
-        assinatura_x = ((pdf.w - assinatura_w) / 2) + 10 # (30 - 20 = 10)
+        # <<< CIRURGIA 1: Deslocamento para a DIREITA >>>
+        # Pega a posição anterior (centro + 1cm) e avança mais 2cm (20mm)
+        assinatura_x = ((pdf.w - assinatura_w) / 2) + 30 # (10 + 20 = 30)
         
-        # <<< CIRURGIA 2: Deslocamento para CIMA >>>
-        # Pega a posição atual e subtrai 30mm (sobe 3cm)
-        assinatura_y = pdf.get_y() - 30
+        # <<< CIRURGIA 2: Deslocamento para BAIXO >>>
+        # Pega a posição anterior (Y - 3cm) e desce 1cm (10mm)
+        assinatura_y = pdf.get_y() - 20 # (-30 + 10 = -20)
         
         pdf.image("assinatura.png", x=assinatura_x, y=assinatura_y, w=assinatura_w)
         
@@ -272,6 +275,7 @@ def gerar_pdf_final(itens, empresa, cidade, nome, cargo):
     
     return pdf.output(dest="S").encode("latin-1", "replace")
 
+### FIM DO NOVO CÓDIGO ###
 ### FIM DO NOVO CÓDIGO ###
 ### FIM DO NOVO CÓDIGO ###
 # --- INTERFACE PRINCIPAL ---
@@ -452,6 +456,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
