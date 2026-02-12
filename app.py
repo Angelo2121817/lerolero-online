@@ -59,8 +59,10 @@ st.markdown(f"""
 
 ### INÍCIO DO NOVO CÓDIGO ###
 
+### INÍCIO DO CÓDIGO A SER SUBSTITUÍDO ###
+
 def extrair_dados_cadastrais_do_texto(texto_llm):
-    """Converte o texto bruto da IA em um dicionário de dados, limpando aspas."""
+    """Converte o texto bruto da IA em um dicionário de dados."""
     dados = {"empresa": "", "cnpj": "", "endereco": "", "cidade": ""}
     padroes = {
         "empresa": r"EMPRESA:\s*(.+)", 
@@ -70,10 +72,11 @@ def extrair_dados_cadastrais_do_texto(texto_llm):
     }
     for chave, padrao in padroes.items():
         match = re.search(padrao, texto_llm, re.IGNORECASE)
-        if match:
-            # <<< CIRURGIA: Adicionado .strip("'\"") para remover aspas indesejadas.
-            dados[chave] = match.group(1).strip().strip("'\"")
+        if match: 
+            dados[chave] = match.group(1).strip()
     return dados
+
+### FIM DO CÓDIGO A SER SUBSTITUÍDO ###
 
 ### FIM DO NOVO CÓDIGO ###
 
@@ -441,6 +444,7 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
 
 
