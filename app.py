@@ -301,7 +301,12 @@ with col1:
 with col2:
     st.subheader("2. Editor Técnico")
     if "editor_exigencia" in st.session_state:
-        modo = st.radio("Profundidade da Resposta:", ["curta", "media", "avancada"], index=1, horizontal=True)
+       ### INÍCIO DO NOVO CÓDIGO ###
+
+        # Configurações de resposta
+        modo = st.radio("Profundidade da Resposta:", ["curta", "media", "avancada"], index=0, horizontal=True) # <<< CIRURGIA: Alterado o 'index' de 1 para 0
+
+### FIM DO NOVO CÓDIGO ###
         tit_sugerido = f"Item {len(st.session_state.relatorio) + 1}"
         titulo_item = st.text_input("Título do Relatório:", tit_sugerido)
         texto_exigencia = st.text_area("Exigência:", value=st.session_state.editor_exigencia, height=100)
@@ -340,4 +345,5 @@ if st.session_state.relatorio:
     st.download_button(label="📄 BAIXAR RELATÓRIO EM PDF", data=pdf_bytes, file_name=f"Relatorio_Defesa_{INPUT_EMPRESA}.pdf", mime="application/pdf", type="primary")
 else:
     st.info("Ainda não há itens aprovados no relatório.")
+
 
